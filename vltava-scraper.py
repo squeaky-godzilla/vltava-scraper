@@ -11,7 +11,6 @@ URL = args.url
 MULTIPLE_PARTS = False
 
 page_html = requests.get(URL)
-# page_html = req.read()
 
 html_soup = BeautifulSoup(page_html.content, "html.parser")
 
@@ -21,17 +20,6 @@ try:
 except:
     html_player_list_items = html_soup.find(class_="file-audio").find_all("li")[0]
     MULTIPLE_PARTS = False
-
-# import pdb; pdb.set_trace()
-
-# get the series title
-# html_soup.find(id="file-serial-player").find("ul").find_all("li")[0].find("a").contents[0].get("title")
-
-# get the mp3 title:
-# html_soup.find(id="file-serial-player").find("ul").find_all("li")[0].find("a").find(class_="filename__text").contents
-
-# get the mp3 url:
-# html_soup.find(id="file-serial-player").find("ul").find_all("li")[0].find('a').get("href")
 
 def replace_chars(string):
     string = "".join([c if c.isalnum() else "_" for c in string])
@@ -90,4 +78,4 @@ def download_files(metadata):
             print("done")
 
 series_metadata = extract_metadata(html_player_list_items)
-# download_files(series_metadata)
+download_files(series_metadata)
