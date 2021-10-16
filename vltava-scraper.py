@@ -61,20 +61,19 @@ def extract_metadata(html_player_items):
 
     return metadata
 
-print(extract_metadata(html_player_list_items))
-
 def download_files(metadata):
 
     for part in metadata["parts"]:
-        print("now downloading {} from {}".format(
+        print("now downloading {} from {} ... ".format(
             part["part_filename"],
             part["part_url"]
-        ))
+        ), end="", flush=True)
         file = requests.get(part["part_url"])
+        print("DONE!")
         with open(part["part_filename"], 'wb') as file_output:
             print("writing {} ... ".format(part["part_filename"]), end="", flush=True)
             file_output.write(file.content)
-            print("done")
+            print("DONE!")
 
 series_metadata = extract_metadata(html_player_list_items)
 download_files(series_metadata)
