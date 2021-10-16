@@ -62,7 +62,6 @@ def extract_metadata(html_player_items):
     return metadata
 
 print(extract_metadata(html_player_list_items))
-import pdb; pdb.set_trace()
 
 def download_files(metadata):
 
