@@ -73,7 +73,7 @@ def download_files(metadata):
         ))
         file = requests.get(part["part_url"])
         with open(part["part_filename"], 'wb') as file_output:
-            print("writing {}".format(part["part_filename"]))
+            print("writing {} ... ".format(part["part_filename"]), end="", flush=True)
             file_output.write(file.content)
             print("done")
 
