@@ -1,5 +1,5 @@
 # vltava-scraper
-Script that crawls Vltava Rozhlas page and downloads the mp3 files.
+Script that scrapes Vltava Rozhlas audio-player page and downloads the referenced mp3 files.
 It is using the `BeautifulSoup` scraping framework.
 
 ## how to run
