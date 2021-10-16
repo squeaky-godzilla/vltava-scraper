@@ -9,5 +9,5 @@ It is using the `BeautifulSoup` scraping framework.
 
 ## usage
 ```
-#$ python vltava-scraper.py -url https://vltava.rozhlas.cz/roman-raz-benda-zatrhne-aneb-hrdina-serialu-hrusinsky-a-stasova-v-povedene-8593177
+python vltava-scraper.py -url https://vltava.rozhlas.cz/roman-raz-benda-zatrhne-aneb-hrdina-serialu-hrusinsky-a-stasova-v-povedene-8593177
 ```
