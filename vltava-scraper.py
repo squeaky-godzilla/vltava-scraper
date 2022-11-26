@@ -1,6 +1,9 @@
 import requests
+import os
+import json
 from bs4 import BeautifulSoup
 import argparse
+from zipfile import ZipFile
 
 parser = argparse.ArgumentParser(description='download mp3 from Rozhlas Vltava page')
 parser.add_argument("-url",type=str)
@@ -8,72 +11,52 @@ parser.add_argument("-url",type=str)
 args = parser.parse_args()
 
 URL = args.url
-MULTIPLE_PARTS = False
 
 page_html = requests.get(URL)
 
 html_soup = BeautifulSoup(page_html.content, "html.parser")
 
-try:
-    html_player_list_items = html_soup.find(id="file-serial-player").find("ul").find_all("li")
-    MULTIPLE_PARTS = True
-except:
-    html_player_list_items = html_soup.find(class_="file-audio").find_all("li")[0]
-    MULTIPLE_PARTS = False
 
-def replace_chars(string):
-    string = "".join([c if c.isalnum() else "_" for c in string])
-    return string
+player_metadata = json.loads(
+    html_soup.find(class_="mujRozhlasPlayer").attrs["data-player"].encode().decode("unicode-escape")
+    )
 
-def extract_metadata(html_player_items): 
+playlist = player_metadata["data"]["playlist"]
+archive_filename = player_metadata["data"]["playlist"][0]["meta"]["ga"]["contentNameShort"] + ".zip"
 
-    metadata = {}
-    metadata["parts"] = []
+def download_files(playlist):
 
-    if MULTIPLE_PARTS:
+    file_list = []
+    
+    for part in playlist:
+        content_name = part["meta"]["ga"]["contentNameShort"]
+        part_number = part["meta"]["ga"]["contentSerialPart"]
+        url = part["audioLinks"][0]["url"]
+        filename = "{} - {}.mp3".format(content_name, part_number)
 
-        metadata["title"] = html_player_items[0].find("a").contents[0].get("title")
+        file_list.append(filename)
 
-        for part in html_player_items:
-            part_name = part.find("a").find(class_="filename__text").contents[0]
-            part_url = part.find('a').get("href")
-            part_filename = replace_chars("{} {}".format(metadata["title"], part_name))
-            metadata["parts"].append(
-                {
-                    "part_name": part_name,
-                    "part_url": part_url, 
-                    "part_filename": part_filename + ".mp3"
-                }
-                )
 
-    else:
-        metadata["title"] = html_player_items.find("a").contents[0]
-        part_name = html_player_items.find("a").contents[0]
-        part_url = html_player_items.find("a").get("href")
-        part_filename = replace_chars("{}".format(part_name))
-        metadata["parts"].append(
-                {
-                    "part_name": part_name,
-                    "part_url": part_url, 
-                    "part_filename": part_filename + ".mp3"
-                }
-                )
+        print("stahuju {}".format(filename))
+        data = requests.get(url)
+        with open(filename, "wb") as file_out:
+            file_out.write(data.content)
 
-    return metadata
+    print("Hotovo!")
+    return(file_list)
 
-def download_files(metadata):
+def archive_files(archive_filename, file_list):
+    
+    print("pakuju do archivu {}".format(archive_filename))
+    with ZipFile(archive_filename, "w") as archive:
+        for filename in file_list:
+            archive.write(filename)
 
-    for part in metadata["parts"]:
-        print("now downloading {} from {} ... ".format(
-            part["part_filename"],
-            part["part_url"]
-        ), end="", flush=True)
-        file = requests.get(part["part_url"])
-        print("DONE!")
-        with open(part["part_filename"], 'wb') as file_output:
-            print("writing {} ... ".format(part["part_filename"]), end="", flush=True)
-            file_output.write(file.content)
-            print("DONE!")
 
-series_metadata = extract_metadata(html_player_list_items)
-download_files(series_metadata)
+def delete_files(file_list):
+    for filename in file_list:
+        os.remove(filename)
+
+file_list = download_files(playlist)
+archive_files(archive_filename, file_list)
+delete_files(file_list)
