@@ -15,11 +15,11 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Package Application
-      uses: JackMcKew/pyinstaller-action-windows@main
-      with:
-        path: src
+      run: |
+          pip install pyinstaller
+          pyinstaller src/vltava-scraper.py --onefile
 
     - uses: actions/upload-artifact@v2
       with:
         name: vltava-scraper
-        path: src/dist/windows
+        path: src/dist/

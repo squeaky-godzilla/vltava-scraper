@@ -16,13 +16,13 @@ page_html = requests.get(URL)
 
 html_soup = BeautifulSoup(page_html.content, "html.parser")
 
+metadata_string = html_soup.find(class_="mujRozhlasPlayer").attrs["data-player"].encode().decode("unicode-escape")
 
-player_metadata = json.loads(
-    html_soup.find(class_="mujRozhlasPlayer").attrs["data-player"].encode().decode("unicode-escape")
-    )
+player_metadata = json.loads(metadata_string)
 
 playlist = player_metadata["data"]["playlist"]
-archive_filename = player_metadata["data"]["playlist"][0]["meta"]["ga"]["contentNameShort"] + ".zip"
+
+archive_filename = player_metadata["data"]["series"]["title"].split(".")[0] + ".zip"
 
 def download_files(playlist):
 
@@ -30,7 +30,10 @@ def download_files(playlist):
     
     for part in playlist:
         content_name = part["meta"]["ga"]["contentNameShort"]
-        part_number = part["meta"]["ga"]["contentSerialPart"]
+        try:
+            part_number = part["meta"]["ga"]["contentSerialPart"]
+        except KeyError:
+            part_number = ""
         url = part["audioLinks"][0]["url"]
         filename = "{} - {}.mp3".format(content_name, part_number)
 
