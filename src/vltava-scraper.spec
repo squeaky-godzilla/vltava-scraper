@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['src/vltava-scraper.py'],
+    ['vltava-scraper.py'],
     pathex=[],
     binaries=[],
     datas=[],
