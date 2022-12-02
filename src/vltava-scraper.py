@@ -16,13 +16,19 @@ page_html = requests.get(URL)
 
 html_soup = BeautifulSoup(page_html.content, "html.parser")
 
-metadata_string = html_soup.find(class_="mujRozhlasPlayer").attrs["data-player"].encode().decode("unicode-escape")
+metadata_string = html_soup.find(class_="mujRozhlasPlayer").attrs["data-player"].encode().decode("unicode-escape").replace("\\","")
 
-player_metadata = json.loads(metadata_string)
+try:
+    player_metadata = json.loads(metadata_string)
+except json.decoder.JSONDecodeError:
+    with open("error_metadata", "wb") as metadata_json:
+        metadata_json.write(metadata_string.encode())
 
 playlist = player_metadata["data"]["playlist"]
 
 archive_filename = player_metadata["data"]["series"]["title"].split(".")[0] + ".zip"
+
+
 
 def download_files(playlist):
 
