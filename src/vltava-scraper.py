@@ -4,6 +4,7 @@ import json
 from bs4 import BeautifulSoup
 import argparse
 from zipfile import ZipFile
+from gofile import Gofile
 
 parser = argparse.ArgumentParser(description='download mp3 from Rozhlas Vltava page')
 parser.add_argument("-url",type=str)
@@ -17,6 +18,9 @@ page_html = requests.get(URL)
 html_soup = BeautifulSoup(page_html.content, "html.parser")
 
 metadata_string = html_soup.find(class_="mujRozhlasPlayer").attrs["data-player"].encode().decode("unicode-escape").replace("\\","")
+
+
+client = Gofile()
 
 try:
     player_metadata = json.loads(metadata_string)
@@ -66,6 +70,12 @@ def delete_files(file_list):
     for filename in file_list:
         os.remove(filename)
 
+def upload_archive(archive_filename):
+    response = client.upload_file(archive_filename)
+    print("download link: {}".format(response["downloadPage"]))
+
 file_list = download_files(playlist)
 archive_files(archive_filename, file_list)
+upload_archive(archive_filename)
 delete_files(file_list)
+delete_files([archive_filename])
